@@ -320,14 +320,17 @@ Tests:       25 passed, 25 total
 
 ## Demo Video
 
-🎥 **Demo video (1–2 minutes):** Record a walkthrough showing:
-1. Connect Freighter wallet on the [live demo](https://frontend-eight-delta-o0pj7gck3j.vercel.app)
-2. Browse deployed polls
-3. Cast a vote on `CB7JNP...` and see the activity feed update in real-time
-4. Verify the transaction on [Stellar Expert](https://stellar.expert/explorer/testnet/tx/03c0f89486de1fd0ddf902269e4a6cf44234ecdbce3697dc774fa0d6effbeb3f)
+🎥 **[Watch the demo →](screenshots/videos/demo.webm)** (1.5 MB · 1.5 min)
 
-> **After recording:** Upload to YouTube and add the link here:
-> `[Watch the demo →](https://youtube.com/your-demo-link)`
+The demo walks through:
+1. 📋 **Poll list** — browsing deployed polls on the [live site](https://frontend-eight-delta-o0pj7gck3j.vercel.app)
+2. 📊 **Poll detail** — viewing question, options, and vote counts
+3. 📡 **Activity feed** — real-time event stream with live indicator
+4. 📱 **Mobile responsive** — same UI at 375px with single-column layout
+5. 🔍 **Transaction verification** — inspecting the vote TX on [Stellar Expert](https://stellar.expert/explorer/testnet/tx/03c0f89486de1fd0ddf902269e4a6cf44234ecdbce3697dc774fa0d6effbeb3f)
+
+> 💡 **YouTube mirror:** Download `demo.webm` and [upload to YouTube](https://studio.youtube.com) → paste the link here:
+> `[Watch on YouTube →](https://youtube.com/your-demo-link)`
 
 ---
 
