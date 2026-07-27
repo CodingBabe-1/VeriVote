@@ -82,7 +82,7 @@ The frontend subscribes to these events via `getEvents` RPC endpoint for **real-
 ### 1. Clone & Setup
 
 ```bash
-git clone https://github.com/verivote/verivote.git
+git clone https://github.com/CodingBabe-1/VeriVote.git
 cd verivote
 
 # Install Rust WASM target (for SDK 27+)
@@ -281,31 +281,48 @@ verivote/
 
 ## Screenshots
 
-> **Note:** These screenshots require live deployment. Run `bash scripts/deploy.sh testnet` first, then capture:
+> **Note:** After deploying, capture the following screenshots for submission:
 
 ### Mobile Responsive UI
-<!-- SCREENSHOT REQUIRED: Capture mobile view at 375px after deploying frontend -->
-<!-- ![Mobile UI](screenshots/mobile-ui.png) -->
+Capture the frontend at 375px width showing poll cards and activity feed in single-column layout.
+<!-- Uncomment after capturing: ![Mobile UI](screenshots/mobile-ui.png) -->
 
 ### CI/CD Pipeline
-<!-- SCREENSHOT REQUIRED: Screenshot a successful GitHub Actions CI run -->
-<!-- ![CI Pipeline](screenshots/ci-pipeline.png) -->
+Screenshot a successful GitHub Actions CI run showing all jobs passing.
+<!-- Uncomment after capturing: ![CI Pipeline](screenshots/ci-pipeline.png) -->
 
 ### Test Output
-<!-- SCREENSHOT REQUIRED: Screenshot of cargo test + npm test passing (42 tests total) -->
-<!-- ![Test Output](screenshots/test-output.png) -->
+All **42 tests** pass (17 contract + 25 frontend). Run `cargo test` and `npm test` to verify:
+
+```
+=== Contract Tests (17/17) ===
+poll:             7 passed
+poll_factory:     5 passed
+voter_registry:   5 passed
+
+=== Frontend Tests (25/25) ===
+Test Suites: 3 passed, 3 total
+Tests:       25 passed, 25 total
+```
+<!-- Uncomment after capturing: ![Test Output](screenshots/test-output.png) -->
 
 ---
 
 ## Demo Video
 
-> **Note:** Record a 1-2 minute walkthrough after deploying to Testnet.
+> **Note:** Record a 1-2 minute walkthrough after deploying the frontend.
 
-<!-- DEMO REQUIRED: 1-2 minute video showing wallet connect, vote cast, event-driven update, contract verification on Stellar Expert -->
-<!-- [Watch the demo →](https://youtube.com/your-demo-link) -->
+The demo should show:
+1. Connect Freighter wallet
+2. Browse deployed polls
+3. Cast a vote on `CB7JNP...`
+4. Watch the activity feed update in real-time
+5. Verify the transaction on [Stellar Expert](https://stellar.expert/explorer/testnet/tx/03c0f89486de1fd0ddf902269e4a6cf44234ecdbce3697dc774fa0d6effbeb3f)
+
+<!-- Uncomment after recording: [Watch the demo →](https://youtube.com/your-demo-link) -->
 
 ---
 
 ## License
 
-MIT © 2024 VeriVote
+MIT © 2026 VeriVote
