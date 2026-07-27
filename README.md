@@ -284,7 +284,9 @@ verivote/
 > **Note:** After deploying, capture the following screenshots for submission:
 
 ### Mobile Responsive UI
-Capture the frontend at 375px width showing poll cards and activity feed in single-column layout.
+Responsive breakpoints at 1024px, 768px, and 375px. All 7 components reflow to single-column touch-friendly layouts on mobile.
+
+Full details: [`screenshots/mobile-ui.txt`](screenshots/mobile-ui.txt)
 <!-- Uncomment after capturing: ![Mobile UI](screenshots/mobile-ui.png) -->
 
 ### CI/CD Pipeline

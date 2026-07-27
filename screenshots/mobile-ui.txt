@@ -1,0 +1,22 @@
+=== VERIVOTE MOBILE-RESPONSIVE UI ===
+
+Breakpoints (in globals.css):
+  - 1024px: Sidebar stacks below content (single-column)
+  - 768px:  Container padding reduces, header wraps, cards go full-width
+  - 375px:  Minimum compact layout for small phones
+
+Pages built (Next.js static generation):
+  - /            (Home)      - 2.45 kB  (Poll list + Activity Feed)
+  - /poll/[id]   (Detail)    - 3.57 kB  (Voting interface)
+  - /404         (Fallback)  - 180 B
+
+Components (all mobile-adapted):
+  - WalletButton  - reflows on small screens
+  - PollCard      - single-column, touch-friendly hit targets
+  - PollList      - grid collapses to 1fr on mobile
+  - VoteForm      - full-width options, 14px labels
+  - ActivityFeed  - max-height 300px, compact items
+  - ErrorDisplay  - flex-wrap actions
+  - SkeletonLoader - all 4 types responsive
+
+To view: npm run dev from /frontend, open http://localhost:3000 in Chrome DevTools at 375px.
