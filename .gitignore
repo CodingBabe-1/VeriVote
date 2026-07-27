@@ -1,0 +1,14 @@
+# Rust/Contracts
+target/
+**/test_snapshots/
+
+# Node/Frontend
+node_modules/
+.next/
+
+# Env
+.env
+
+# OS
+.DS_Store
+Thumbs.db
