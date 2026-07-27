@@ -1,6 +1,8 @@
 # VeriVote — Production-Grade On-Chain Polling Platform
 
-🚀 **Live Demo:** [verivote.vercel.app](https://frontend-eight-delta-o0pj7gck3j.vercel.app)
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Site-7c3aed?style=for-the-badge)](https://frontend-eight-delta-o0pj7gck3j.vercel.app)
+[![Watch Demo](https://img.shields.io/badge/🎥_Watch_Demo-1.5_min-22c55e?style=for-the-badge)](screenshots/videos/demo.mp4)
+[![Download Demo](https://img.shields.io/badge/⬇️_Download_MP4-515_KB-6366f1?style=for-the-badge)](screenshots/videos/demo.mp4)
 [![CI Pipeline](https://github.com/CodingBabe-1/VeriVote/actions/workflows/ci.yml/badge.svg)](https://github.com/CodingBabe-1/VeriVote/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -318,9 +320,11 @@ Tests:       25 passed, 25 total
 
 ---
 
-## Demo Video🎥 **[Watch the demo →](screenshots/videos/demo.mp4)** (515 KB · 1.5 min)
+## Demo Video
 
-⬇️ **Download:** [`demo.mp4`](screenshots/videos/demo.mp4) (MP4) | [`demo.webm`](screenshots/videos/demo.webm) (WebM)
+🎥 **[▶️ Watch the demo →](screenshots/videos/demo.mp4)** (MP4 · 515 KB · 1.5 min)
+
+⬇️ **Download:** [📥 `demo.mp4` (MP4)](screenshots/videos/demo.mp4) · [📥 `demo.webm` (WebM)](screenshots/videos/demo.webm)
 
 The demo walks through:
 1. 📋 **Poll list** — browsing deployed polls on the [live site](https://frontend-eight-delta-o0pj7gck3j.vercel.app)
