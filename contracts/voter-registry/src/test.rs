@@ -27,12 +27,9 @@ fn test_register_and_check_eligibility() {
     // Initialize
     client.init(&admin);
 
-    // Register voter (admin auth required)
+    // Register voter and enable whitelist (admin auth required)
     env.mock_all_auths();
     client.register(&admin, &voter);
-
-    // Enable whitelist
-    env.mock_all_auths();
     client.set_wl(&admin, &true);
 
     // Voter should be eligible
