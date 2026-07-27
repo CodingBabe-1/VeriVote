@@ -70,7 +70,6 @@ fn test_double_vote_prevention() {
     client.init(&admin);
     env.mock_all_auths();
     client.register(&admin, &voter);
-    env.mock_all_auths();
     client.set_wl(&admin, &true);
 
     // First check: eligible

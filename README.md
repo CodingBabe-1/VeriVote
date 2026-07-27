@@ -1,6 +1,7 @@
 # VeriVote — Production-Grade On-Chain Polling Platform
 
 [![CI Pipeline](https://github.com/verivote/verivote/actions/workflows/ci.yml/badge.svg)](https://github.com/verivote/verivote/actions/workflows/ci.yml)
+<!-- NOTE: Update the badge URL above if your GitHub repo has a different name or org -->
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **VeriVote** is a production-grade, multi-contract polling platform on **Stellar/Soroban** that combines a factory-based architecture, cross-contract eligibility checks, real-time event streaming, and full testing/CI-CD automation — demonstrating the complete lifecycle of a real-world dApp.
@@ -74,7 +75,7 @@ The frontend subscribes to these events via `getEvents` RPC endpoint for **real-
 
 ### Prerequisites
 
-- **Rust** ≥ 1.75 ([install](https://rustup.rs/))
+- **Rust** ≥ 1.84 ([install](https://rustup.rs/))
 - **Node.js** ≥ 20 ([install](https://nodejs.org/))
 - **Soroban CLI** ([install](https://soroban.stellar.org/docs/getting-started/setup))
 - **Stellar Testnet account** with XLM ([faucet](https://laboratory.stellar.org/#account-creator))
@@ -85,12 +86,12 @@ The frontend subscribes to these events via `getEvents` RPC endpoint for **real-
 git clone https://github.com/verivote/verivote.git
 cd verivote
 
-# Install Rust WASM target
-rustup target add wasm32-unknown-unknown
+# Install Rust WASM target (for SDK 27+)
+rustup target add wasm32v1-none
 
 # Build contracts
 cd contracts
-cargo build --target wasm32-unknown-unknown
+cargo build --target wasm32v1-none
 
 # Install frontend dependencies
 cd ../frontend
@@ -163,13 +164,13 @@ Soroban contracts are immutable once deployed. To upgrade:
 
 ## Deployed Contracts (Testnet)
 
+> **Note:** These addresses are populated after running `bash scripts/deploy.sh testnet`. Contract IDs are written to `deployed-contracts.json`.
+
 | Contract | Address |
 |----------|---------|
-| **PollFactory** | `TBD` |
-| **VoterRegistry** | `TBD` |
-| **Poll (sample)** | `TBD` |
-
-*Deploy and update these after your first deployment.*
+| **PollFactory** | *(run deploy.sh)* |
+| **VoterRegistry** | *(run deploy.sh)* |
+| **Poll (sample)** | *(run deploy.sh)* |
 
 ### Sample Transaction
 
@@ -204,7 +205,7 @@ Soroban contracts are immutable once deployed. To upgrade:
 
 ### CI (`ci.yml`) — runs on every push & PR
 
-- ✅ Cargo build (wasm32-unknown-unknown)
+- ✅ Cargo build (wasm32v1-none)
 - ✅ Cargo test
 - ✅ Cargo clippy (lint)
 - ✅ Frontend test (`npm test`)
@@ -279,24 +280,28 @@ verivote/
 
 ## Screenshots
 
+> **Note:** These screenshots require live deployment. Run `bash scripts/deploy.sh testnet` first, then capture:
+
 ### Mobile Responsive UI
-<!-- ADD SCREENSHOT: Mobile view at 375px -->
-![Mobile UI](screenshots/mobile-ui.png)
+<!-- SCREENSHOT REQUIRED: Capture mobile view at 375px after deploying frontend -->
+<!-- ![Mobile UI](screenshots/mobile-ui.png) -->
 
 ### CI/CD Pipeline
-<!-- ADD SCREENSHOT: GitHub Actions CI run -->
-![CI Pipeline](screenshots/ci-pipeline.png)
+<!-- SCREENSHOT REQUIRED: Screenshot a successful GitHub Actions CI run -->
+<!-- ![CI Pipeline](screenshots/ci-pipeline.png) -->
 
 ### Test Output
-<!-- ADD SCREENSHOT: cargo test + npm test passing -->
-![Test Output](screenshots/test-output.png)
+<!-- SCREENSHOT REQUIRED: Screenshot of cargo test + npm test passing (42 tests total) -->
+<!-- ![Test Output](screenshots/test-output.png) -->
 
 ---
 
 ## Demo Video
 
-<!-- ADD LINK: 1-2 minute demo walkthrough -->
-[Watch the demo →](https://youtube.com/your-demo-link)
+> **Note:** Record a 1-2 minute walkthrough after deploying to Testnet.
+
+<!-- DEMO REQUIRED: 1-2 minute video showing wallet connect, vote cast, event-driven update, contract verification on Stellar Expert -->
+<!-- [Watch the demo →](https://youtube.com/your-demo-link) -->
 
 ---
 
