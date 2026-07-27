@@ -292,19 +292,20 @@ Screenshot a successful GitHub Actions CI run showing all jobs passing.
 <!-- Uncomment after capturing: ![CI Pipeline](screenshots/ci-pipeline.png) -->
 
 ### Test Output
-All **42 tests** pass (17 contract + 25 frontend). Run `cargo test` and `npm test` to verify:
+All **42 tests** pass (17 contract + 25 frontend). Verified July 27, 2026.
 
 ```
-=== Contract Tests (17/17) ===
+=== Contract Tests (17/17 passed) ===
 poll:             7 passed
 poll_factory:     5 passed
 voter_registry:   5 passed
 
-=== Frontend Tests (25/25) ===
+=== Frontend Tests (25/25 passed) ===
 Test Suites: 3 passed, 3 total
 Tests:       25 passed, 25 total
 ```
-<!-- Uncomment after capturing: ![Test Output](screenshots/test-output.png) -->
+
+Full output: [`screenshots/test-output.txt`](screenshots/test-output.txt)
 
 ---
 
