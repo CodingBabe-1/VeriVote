@@ -1,8 +1,8 @@
 # VeriVote — Production-Grade On-Chain Polling Platform
 
 [![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Visit_Site-7c3aed?style=for-the-badge)](https://frontend-eight-delta-o0pj7gck3j.vercel.app)
-[![Watch Demo](https://img.shields.io/badge/🎥_Watch_Demo-1.5_min-22c55e?style=for-the-badge)](screenshots/videos/demo.mp4)
-[![Download Demo](https://img.shields.io/badge/⬇️_Download_MP4-515_KB-6366f1?style=for-the-badge)](screenshots/videos/demo.mp4)
+[![Watch Demo](https://img.shields.io/badge/🎥_Watch_Demo-1.5_min-22c55e?style=for-the-badge)](https://frontend-eight-delta-o0pj7gck3j.vercel.app)
+[![Download MP4](https://img.shields.io/badge/📥_Download_MP4-515_KB-6366f1?style=for-the-badge)](screenshots/videos/demo.mp4)
 [![CI Pipeline](https://github.com/CodingBabe-1/VeriVote/actions/workflows/ci.yml/badge.svg)](https://github.com/CodingBabe-1/VeriVote/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
