@@ -163,18 +163,20 @@ Soroban contracts are immutable once deployed. To upgrade:
 
 ## Deployed Contracts (Testnet)
 
-> **Note:** These addresses are populated after running `bash scripts/deploy.sh testnet`. Contract IDs are written to `deployed-contracts.json`.
+> **Deployed on Stellar Testnet, July 2026**
 
 | Contract | Address |
 |----------|---------|
-| **PollFactory** | *(run deploy.sh)* |
-| **VoterRegistry** | *(run deploy.sh)* |
-| **Poll (sample)** | *(run deploy.sh)* |
+| **PollFactory** | `CB3BPO5DVLTHCY33ALAVEELGJG7R46JORIUELYK2C4ROQA5T5YRGVQGR` |
+| **VoterRegistry** | `CAZWQLJGW3V2FYLHFKSGEULBC7HZTANLLX4XXQNGTH42SV3PUQUCYMI5` |
+| **Poll (sample)** | `CB7JNPUSZ4VU2TSTYID52D5G4MZXOEUOUZKEBRA332UEGWVAQJIRO7JU` |
+
+*Verify on [Stellar Expert](https://stellar.expert/explorer/testnet)*
 
 ### Sample Transaction
 
-- **Vote TX hash:** `TBD`
-- [View on Stellar Expert →](https://stellar.expert/explorer/testnet)
+- **Vote TX:** [`03c0f89486de1fd0ddf902269e4a6cf44234ecdbce3697dc774fa0d6effbeb3f`](https://stellar.expert/explorer/testnet/tx/03c0f89486de1fd0ddf902269e4a6cf44234ecdbce3697dc774fa0d6effbeb3f)
+- Voted "Stellar" on poll `CB7JNP...` ✅
 
 ---
 

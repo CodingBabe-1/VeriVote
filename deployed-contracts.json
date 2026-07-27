@@ -1,0 +1,16 @@
+{
+  "network": "testnet",
+  "rpc_url": "https://soroban-testnet.stellar.org",
+  "network_passphrase": "Test SDF Network ; September 2015",
+  "deployer": "GCHAEQQU6EKOOIYJDN23ODUZDACII6J4ZHOQKAGEMTE5BJ252LHZR6L7",
+  "contracts": {
+    "voter_registry": "CAZWQLJGW3V2FYLHFKSGEULBC7HZTANLLX4XXQNGTH42SV3PUQUCYMI5",
+    "poll_wasm_hash": "7f6a3bfeccde72f6eb89df2bfe253b6bb349e3155d21ed32340d0115fd8e9998",
+    "poll_factory": "CB3BPO5DVLTHCY33ALAVEELGJG7R46JORIUELYK2C4ROQA5T5YRGVQGR",
+    "sample_poll": "CB7JNPUSZ4VU2TSTYID52D5G4MZXOEUOUZKEBRA332UEGWVAQJIRO7JU"
+  },
+  "transactions": {
+    "sample_vote": "03c0f89486de1fd0ddf902269e4a6cf44234ecdbce3697dc774fa0d6effbeb3f"
+  },
+  "deployed_at": "2026-07-27T00:00:00Z"
+}
