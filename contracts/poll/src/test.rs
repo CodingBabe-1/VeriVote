@@ -21,7 +21,7 @@ fn setup_poll(env: &Env) -> (Address, Address, PollClient, Address, String) {
 #[test]
 fn test_initialize_poll() {
     let env = Env::default();
-    let (poll_id, creator, poll_client, voter_registry_id, question) = setup_poll(&env);
+    let (_poll_id, creator, poll_client, voter_registry_id, question) = setup_poll(&env);
 
     let info = poll_client.poll_info();
     assert_eq!(info.question, question);

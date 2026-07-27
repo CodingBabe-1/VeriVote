@@ -53,6 +53,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
         with:
+          targets: wasm32v1-none
           components: clippy
 
       - name: Cache Rust dependencies
@@ -62,8 +63,8 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             contracts/target
-          key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('contracts/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-clippy-
+          key: ${{ runner.os }}-cargo-clippy-v2-${{ hashFiles('contracts/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-clippy-v2-
 
       - name: Cargo clippy
         run: cargo clippy --target wasm32v1-none -- -D warnings
