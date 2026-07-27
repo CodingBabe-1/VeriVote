@@ -1,5 +1,6 @@
 # VeriVote — Production-Grade On-Chain Polling Platform
 
+🚀 **Live Demo:** [verivote.vercel.app](https://frontend-eight-delta-o0pj7gck3j.vercel.app)
 [![CI Pipeline](https://github.com/CodingBabe-1/VeriVote/actions/workflows/ci.yml/badge.svg)](https://github.com/CodingBabe-1/VeriVote/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
