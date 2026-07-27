@@ -311,6 +311,8 @@ Tests:       25 passed, 25 total
 ## Demo Video
 
 > **Note:** Record a 1-2 minute walkthrough after deploying the frontend.
+>
+> _First deploy the frontend to Vercel/Netlify with the contract IDs from `deployed-contracts.json`._
 
 The demo should show:
 1. Connect Freighter wallet
