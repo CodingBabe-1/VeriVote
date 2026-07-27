@@ -318,9 +318,9 @@ Tests:       25 passed, 25 total
 
 ---
 
-## Demo Video
+## Demo Video🎥 **[Watch the demo →](screenshots/videos/demo.mp4)** (515 KB · 1.5 min)
 
-🎥 **[Watch the demo →](screenshots/videos/demo.webm)** (1.5 MB · 1.5 min)
+⬇️ **Download:** [`demo.mp4`](screenshots/videos/demo.mp4) (MP4) | [`demo.webm`](screenshots/videos/demo.webm) (WebM)
 
 The demo walks through:
 1. 📋 **Poll list** — browsing deployed polls on the [live site](https://frontend-eight-delta-o0pj7gck3j.vercel.app)
@@ -329,7 +329,7 @@ The demo walks through:
 4. 📱 **Mobile responsive** — same UI at 375px with single-column layout
 5. 🔍 **Transaction verification** — inspecting the vote TX on [Stellar Expert](https://stellar.expert/explorer/testnet/tx/03c0f89486de1fd0ddf902269e4a6cf44234ecdbce3697dc774fa0d6effbeb3f)
 
-> 💡 **YouTube mirror:** Download `demo.webm` and [upload to YouTube](https://studio.youtube.com) → paste the link here:
+> 💡 **YouTube mirror:** Download `demo.mp4` and [upload to YouTube](https://studio.youtube.com) → paste the link here:
 > `[Watch on YouTube →](https://youtube.com/your-demo-link)`
 
 ---
