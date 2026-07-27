@@ -1,7 +1,6 @@
 # VeriVote — Production-Grade On-Chain Polling Platform
 
-<!-- CI Badge: Uncomment and update URL after confirming your GitHub repo name -->
-<!-- [![CI Pipeline](https://github.com/verivote/verivote/actions/workflows/ci.yml/badge.svg)](https://github.com/verivote/verivote/actions/workflows/ci.yml) -->
+[![CI Pipeline](https://github.com/CodingBabe-1/VeriVote/actions/workflows/ci.yml/badge.svg)](https://github.com/CodingBabe-1/VeriVote/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **VeriVote** is a production-grade, multi-contract polling platform on **Stellar/Soroban** that combines a factory-based architecture, cross-contract eligibility checks, real-time event streaming, and full testing/CI-CD automation — demonstrating the complete lifecycle of a real-world dApp.
