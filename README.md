@@ -288,7 +288,8 @@ verivote/
 Responsive breakpoints at 1024px, 768px, and 375px. All 7 components reflow to single-column touch-friendly layouts on mobile.
 
 Full details: [`screenshots/mobile-ui.txt`](screenshots/mobile-ui.txt)
-<!-- Uncomment after capturing: ![Mobile UI](screenshots/mobile-ui.png) -->
+
+![Mobile UI](screenshots/mobile-ui.png)
 
 ### CI/CD Pipeline
 The CI pipeline runs on every push and PR. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml) for the full config.
@@ -296,7 +297,8 @@ The CI pipeline runs on every push and PR. See [`.github/workflows/ci.yml`](.git
 **Jobs:** contract-build (wasm32v1-none + 17 tests), contract-lint (clippy), frontend-build (npm test + next build).
 
 Pipeline details: [`screenshots/ci-pipeline.txt`](screenshots/ci-pipeline.txt)
-<!-- Uncomment after capturing: ![CI Pipeline](screenshots/ci-pipeline.png) -->
+
+![CI Pipeline](screenshots/ci-pipeline.png)
 
 ### Test Output
 All **42 tests** pass (17 contract + 25 frontend). Verified July 27, 2026.
@@ -310,26 +312,22 @@ voter_registry:   5 passed
 === Frontend Tests (25/25 passed) ===
 Test Suites: 3 passed, 3 total
 Tests:       25 passed, 25 total
-```
+```Full output: [`screenshots/test-output.txt`](screenshots/test-output.txt)
 
-Full output: [`screenshots/test-output.txt`](screenshots/test-output.txt)
+![Test Output](screenshots/test-output.png)
 
 ---
 
 ## Demo Video
 
-> **Note:** Record a 1-2 minute walkthrough after deploying the frontend.
->
-> _First deploy the frontend to Vercel/Netlify with the contract IDs from `deployed-contracts.json`._
-
-The demo should show:
-1. Connect Freighter wallet
+🎥 **Demo video (1–2 minutes):** Record a walkthrough showing:
+1. Connect Freighter wallet on the [live demo](https://frontend-eight-delta-o0pj7gck3j.vercel.app)
 2. Browse deployed polls
-3. Cast a vote on `CB7JNP...`
-4. Watch the activity feed update in real-time
-5. Verify the transaction on [Stellar Expert](https://stellar.expert/explorer/testnet/tx/03c0f89486de1fd0ddf902269e4a6cf44234ecdbce3697dc774fa0d6effbeb3f)
+3. Cast a vote on `CB7JNP...` and see the activity feed update in real-time
+4. Verify the transaction on [Stellar Expert](https://stellar.expert/explorer/testnet/tx/03c0f89486de1fd0ddf902269e4a6cf44234ecdbce3697dc774fa0d6effbeb3f)
 
-<!-- Uncomment after recording: [Watch the demo →](https://youtube.com/your-demo-link) -->
+> **After recording:** Upload to YouTube and add the link here:
+> `[Watch the demo →](https://youtube.com/your-demo-link)`
 
 ---
 
