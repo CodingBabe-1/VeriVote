@@ -1,0 +1,11 @@
+=== VERIVOTE CI/CD PIPELINE ===
+
+Pipeline config: .github/workflows/ci.yml
+Trigger: push + pull_request on main branch
+
+Jobs:
+  1. contract-build  - Cargo build (wasm32v1-none), cargo test (17 tests)
+  2. contract-lint   - Cargo clippy (wasm32v1-none)
+  3. frontend-build  - npm ci, npm test (25 tests), next build
+
+Status: All 42 tests pass locally. Push to GitHub to trigger CI.

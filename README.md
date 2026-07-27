@@ -288,7 +288,11 @@ Capture the frontend at 375px width showing poll cards and activity feed in sing
 <!-- Uncomment after capturing: ![Mobile UI](screenshots/mobile-ui.png) -->
 
 ### CI/CD Pipeline
-Screenshot a successful GitHub Actions CI run showing all jobs passing.
+The CI pipeline runs on every push and PR. See [`.github/workflows/ci.yml`](.github/workflows/ci.yml) for the full config.
+
+**Jobs:** contract-build (wasm32v1-none + 17 tests), contract-lint (clippy), frontend-build (npm test + next build).
+
+Pipeline details: [`screenshots/ci-pipeline.txt`](screenshots/ci-pipeline.txt)
 <!-- Uncomment after capturing: ![CI Pipeline](screenshots/ci-pipeline.png) -->
 
 ### Test Output
