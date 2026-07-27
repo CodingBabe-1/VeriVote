@@ -136,6 +136,7 @@ impl Poll {
         );
 
         // Emit event for real-time streaming
+        #[allow(deprecated)]
         env.events()
             .publish(
                 (soroban_sdk::symbol_short!("voted"),),
@@ -176,6 +177,7 @@ impl Poll {
         env.storage().instance().set(&DataKey::IsClosed, &true);
 
         // Emit event
+        #[allow(deprecated)]
         env.events()
             .publish(
                 (soroban_sdk::symbol_short!("closed"),),

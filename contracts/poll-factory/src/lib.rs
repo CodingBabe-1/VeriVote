@@ -126,6 +126,7 @@ impl PollFactory {
         env.storage().instance().set(&DataKey::PollCount, &count);
 
         // Emit event
+        #[allow(deprecated)]
         env.events().publish(
             (soroban_sdk::symbol_short!("new_poll"),),
             (poll_address.clone(), creator, question),
