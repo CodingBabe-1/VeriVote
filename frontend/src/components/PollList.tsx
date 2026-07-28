@@ -10,9 +10,10 @@ interface PollListProps {
   polls: PollEntry[];
   loading: boolean;
   onSelectPoll: (pollId: string) => void;
+  onCreatePoll: () => void;
 }
 
-export const PollList: React.FC<PollListProps> = ({ polls, loading, onSelectPoll }) => {
+export const PollList: React.FC<PollListProps> = ({ polls, loading, onSelectPoll, onCreatePoll }) => {
   if (loading) {
     return (
       <div className="poll-grid">
@@ -30,7 +31,7 @@ export const PollList: React.FC<PollListProps> = ({ polls, loading, onSelectPoll
         <span className="empty-icon">📭</span>
         <h3>No Polls Yet</h3>
         <p>Create the first poll to get started!</p>
-        <button className="btn btn-primary">Create a Poll</button>
+        <button className="btn btn-primary" onClick={onCreatePoll}>Create a Poll</button>
         <style jsx>{`
           .empty-state {
             text-align: center;

@@ -7,6 +7,7 @@ import {
   fetchPolls,
   fetchPollInfo,
   castVote,
+  createPoll,
   submitSignedTransaction,
   PollEntry,
   PollInfo,
@@ -111,4 +112,59 @@ export function usePollDetail(pollId: string) {
   );
 
   return { poll, loading, error, voting, vote, refetch: loadPoll };
+}
+
+/**
+ * Hook: Create poll flow.
+ * Orchestrates: createPoll (build+simulate) → sign via Freighter → submit.
+ */
+export function useCreatePoll() {
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<AppError | null>(null);
+
+  const create = useCallback(
+    async (
+      question: string,
+      options: string[],
+      signerPublicKey: string
+    ) => {
+      setCreating(true);
+      setError(null);
+      try {
+        // Step 1: Build and simulate the create transaction
+        const { txXdr, pollAddress } = await createPoll(
+          signerPublicKey,
+          question,
+          options
+        );
+
+        // Step 2: Sign via Freighter
+        const signResult = await signTransaction(txXdr, {
+          networkPassphrase: NETWORK_PASSPHRASE,
+        });
+
+        if (signResult.error) {
+          throw new Error(
+            signResult.error.message || 'Transaction signing failed'
+          );
+        }
+
+        // Step 3: Submit
+        await submitSignedTransaction(signResult.signedTxXdr);
+
+        return { pollAddress };
+      } catch (err) {
+        const appError = parseError(err);
+        setError(appError);
+        throw appError;
+      } finally {
+        setCreating(false);
+      }
+    },
+    []
+  );
+
+  const dismissError = useCallback(() => setError(null), []);
+
+  return { creating, error, create, dismissError };
 }

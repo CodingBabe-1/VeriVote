@@ -77,11 +77,12 @@ jobs:
           NEXT_PUBLIC_FACTORY_CONTRACT_ID: ${{ secrets.FACTORY_CONTRACT_ID }}
           NEXT_PUBLIC_VOTER_REGISTRY_CONTRACT_ID: ${{ secrets.VOTER_REGISTRY_CONTRACT_ID }}
 
-      # Vercel deploy step — configure via Vercel CLI or GitHub integration
-      # - name: Deploy to Vercel
-      #   uses: amondnet/vercel-action@v25
-      #   with:
-      #     vercel-token: ${{ secrets.VERCEL_TOKEN }}
-      #     vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-      #     vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-      #     working-directory: ./frontend
+      # Deploy frontend to Vercel (requires VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID secrets)
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: ./frontend
+          vercel-args: '--prod'

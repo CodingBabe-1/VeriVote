@@ -71,6 +71,36 @@ function getContract(contractId: string): Contract {
 // ─── Public API ─────────────────────────────────────────────────────────────
 
 /**
+ * Create a new poll via the PollFactory contract.
+ * Builds the transaction, simulates it, and returns the XDR for Freighter signing.
+ * After signing and submitting, the returned pollAddress points to the new Poll contract.
+ */
+export async function createPoll(
+  creator: string,
+  question: string,
+  options: string[]
+): Promise<{ txHash: string; txXdr: string; pollAddress: string }> {
+  try {
+    if (!creator) {
+      throw new Error('Wallet not connected');
+    }
+    if (!question.trim()) {
+      throw new Error('Question is required');
+    }
+    if (options.length < 2) {
+      throw new Error('At least 2 options required');
+    }
+    if (options.length > 10) {
+      throw new Error('Maximum 10 options allowed');
+    }
+
+    return await buildAndSimulateCreateTx(creator, question.trim(), options);
+  } catch (error) {
+    throw parseError(error);
+  }
+}
+
+/**
  * Fetch all polls from the factory contract via SorobanRpc.Server.simulateTransaction.
  * Uses a Contract instance to build the invocation operation, then decodes the
  * return value with scValToNative.
@@ -253,6 +283,57 @@ async function simulateReadCall(
   }
 
   return success.result.retval;
+}
+
+/**
+ * Build and simulate a create-poll transaction.
+ * Calls PollFactory.create(creator, question, options).
+ */
+async function buildAndSimulateCreateTx(
+  creator: string,
+  question: string,
+  options: string[]
+): Promise<{ txHash: string; txXdr: string; pollAddress: string }> {
+  const contract = getContract(FACTORY_ID);
+
+  const creatorScVal = new Address(creator).toScVal();
+  const questionScVal = nativeToScVal(question);
+  const optionsScVal = nativeToScVal(options);
+
+  const sourceAccount = await server.getAccount(creator);
+
+  const tx = new TransactionBuilder(sourceAccount, {
+    fee: BASE_FEE,
+    networkPassphrase: NETWORK_PASSPHRASE,
+  })
+    .addOperation(
+      contract.call('create', creatorScVal, questionScVal, optionsScVal)
+    )
+    .setTimeout(30)
+    .build();
+
+  const sim = await server.simulateTransaction(tx);
+
+  if (SorobanRpc.Api.isSimulationError(sim)) {
+    throw new Error(`Create poll simulation failed: ${sim.error}`);
+  }
+
+  const success = sim as SorobanRpc.Api.SimulateTransactionSuccessResponse;
+  let pollAddress = '';
+  if (success.result?.retval) {
+    const decoded = scValToNative(success.result.retval);
+    pollAddress =
+      decoded && typeof decoded === 'object'
+        ? String(
+            (decoded as { toString?: () => string }).toString?.() ?? ''
+          )
+        : String(decoded ?? '');
+  }
+
+  const txXdr = tx.toXDR();
+  const txHash = tx.hash().toString('hex');
+
+  return { txHash, txXdr, pollAddress };
 }
 
 /**
