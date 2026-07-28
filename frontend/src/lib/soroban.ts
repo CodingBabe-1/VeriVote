@@ -1,12 +1,40 @@
 /**
  * Soroban contract interaction layer.
  * Type-safe bindings for PollFactory, Poll, and VoterRegistry contracts.
- * Uses @stellar/stellar-sdk for Soroban RPC communication.
+ * Uses @stellar/stellar-sdk for Soroban RPC communication, Contract
+ * initialization, TransactionBuilder, and XDR SCVal encoding/decoding.
  */
+import {
+  SorobanRpc,
+  Contract,
+  TransactionBuilder,
+  Address,
+  xdr,
+  scValToNative,
+  nativeToScVal,
+  Networks,
+  BASE_FEE,
+} from '@stellar/stellar-sdk';
 import { parseError } from './errors';
 
-const RPC_URL = process.env.NEXT_PUBLIC_SOROBAN_RPC_URL || 'https://soroban-testnet.stellar.org';
+const RPC_URL =
+  process.env.NEXT_PUBLIC_SOROBAN_RPC_URL ||
+  'https://soroban-testnet.stellar.org';
+const NETWORK_PASSPHRASE =
+  process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE || Networks.TESTNET;
 const FACTORY_ID = process.env.NEXT_PUBLIC_FACTORY_CONTRACT_ID || '';
+
+/** SorobanRpc.Server — single instance for all RPC communication */
+const server = new SorobanRpc.Server(RPC_URL);
+
+/**
+ * A funded Testnet account used as the source for read-only simulations.
+ * This is the well-known Friendbot-funded testnet account.
+ */
+const READ_SOURCE_PK =
+  'GBZXN7PIRZGNMHGA7MUUUF4GWPY5AYPV6LY4UV2GL6VJGIQRXFDNM5QV';
+
+// ─── Public types ───────────────────────────────────────────────────────────
 
 export interface PollEntry {
   id: string;
@@ -34,45 +62,58 @@ export interface ActivityEntry {
   timestamp: number;
 }
 
+// ─── Contract instances (reusable) ──────────────────────────────────────────
+
+function getContract(contractId: string): Contract {
+  return new Contract(contractId);
+}
+
+// ─── Public API ─────────────────────────────────────────────────────────────
+
 /**
- * Fetch all polls from the factory contract via Soroban RPC.
+ * Fetch all polls from the factory contract via SorobanRpc.Server.simulateTransaction.
+ * Uses a Contract instance to build the invocation operation, then decodes the
+ * return value with scValToNative.
  */
 export async function fetchPolls(): Promise<PollEntry[]> {
   try {
-    const response = await sorobanRpcCall(FACTORY_ID, 'polls', []);
-    return parsePollsResult(response);
+    const retval = await simulateReadCall(FACTORY_ID, 'polls', []);
+    const decoded = scValToNative(retval);
+    return parsePollsArray(decoded);
   } catch (error) {
     throw parseError(error);
   }
 }
 
 /**
- * Get detailed info for a specific poll via Soroban RPC.
+ * Get detailed info for a specific poll via SorobanRpc.Server.simulateTransaction.
  */
 export async function fetchPollInfo(pollId: string): Promise<PollInfo> {
   try {
-    const response = await sorobanRpcCall(pollId, 'poll_info', []);
-    return parsePollInfoResult(response);
+    const retval = await simulateReadCall(pollId, 'poll_info', []);
+    const decoded = scValToNative(retval);
+    return parsePollInfoMap(decoded);
   } catch (error) {
     throw parseError(error);
   }
 }
 
 /**
- * Cast a vote on a poll via Freighter wallet signature.
+ * Cast a vote on a poll.  Builds a proper Soroban transaction with
+ * TransactionBuilder, simulates it via the RPC server, then returns the
+ * assembled transaction XDR so Freighter can sign and submit it.
  */
 export async function castVote(
   pollId: string,
   optionIndex: number,
   signerPublicKey: string
-): Promise<{ txHash: string }> {
+): Promise<{ txHash: string; txXdr: string }> {
   try {
     if (!signerPublicKey) {
       throw new Error('Wallet not connected');
     }
 
-    const txHash = await submitVoteTransaction(pollId, optionIndex, signerPublicKey);
-    return { txHash };
+    return await buildAndSimulateVoteTx(pollId, optionIndex, signerPublicKey);
   } catch (error) {
     throw parseError(error);
   }
@@ -80,8 +121,7 @@ export async function castVote(
 
 /**
  * Subscribe to real-time events from ALL known Poll contracts AND the Factory.
- * Fetches the list of poll IDs from the factory, then subscribes to events
- * from each, ensuring votes and closures are captured.
+ * Uses SorobanRpc.Server.getEvents (proper SDK method) instead of raw fetch.
  * Returns an unsubscribe function.
  */
 export function subscribeToEvents(
@@ -96,8 +136,9 @@ export function subscribeToEvents(
         // 1. Fetch all poll IDs from factory
         let pollIds: string[] = [];
         try {
-          const pollsResponse = await sorobanRpcCall(FACTORY_ID, 'polls', []);
-          const polls = parsePollsResult(pollsResponse);
+          const retval = await simulateReadCall(FACTORY_ID, 'polls', []);
+          const decoded = scValToNative(retval);
+          const polls = parsePollsArray(decoded);
           pollIds = polls.map((p) => p.id);
         } catch {
           // Factory may not be deployed yet; continue
@@ -106,47 +147,37 @@ export function subscribeToEvents(
         // 2. Build list of contracts to watch: factory + all polls
         const contractsToWatch = [FACTORY_ID, ...pollIds].filter(Boolean);
 
-        // 3. Fetch events for all watched contracts
+        // 3. Fetch events for all watched contracts via SorobanRpc.Server.getEvents
         for (const contractId of contractsToWatch) {
           try {
-            const eventsResponse = await fetch(`${RPC_URL}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                jsonrpc: '2.0',
-                id: 1,
-                method: 'getEvents',
-                params: {
-                  startLedger: 0,
-                  filters: [
-                    {
-                      type: 'contract',
-                      contractIds: [contractId],
-                      topics: [['*']],
-                    },
-                  ],
-                  limit: 50,
+            const eventsResponse = await server.getEvents({
+              startLedger: 0,
+              filters: [
+                {
+                  type: 'contract',
+                  contractIds: [contractId],
+                  topics: [['*']],
                 },
-              }),
+              ],
+              limit: 50,
             });
 
-            if (eventsResponse.ok) {
-              const data = await eventsResponse.json();
-              const events = data.result?.events || [];
-              for (const event of events) {
-                const activity = parseEventToActivity(event, contractId);
-                if (activity) onEvent(activity);
-              }
+            const events = eventsResponse.events || [];
+            for (const event of events) {
+              const activity = parseEventToActivity(event, contractId);
+              if (activity) onEvent(activity);
             }
           } catch {
             // Individual contract fetch failure; skip and continue
           }
         }
       } catch (error) {
-        onError(error instanceof Error ? error : new Error('Event stream error'));
+        onError(
+          error instanceof Error ? error : new Error('Event stream error')
+        );
       }
 
-      // Poll every 5 seconds (works as a pseudo-stream for Testnet)
+      // Poll every 5 seconds
       await new Promise((resolve) => setTimeout(resolve, 5000));
     }
   };
@@ -158,148 +189,213 @@ export function subscribeToEvents(
   };
 }
 
-// --- RPC Helpers ---
+/**
+ * Submit a signed transaction XDR to the network.
+ * Call this after Freighter has signed the transaction.
+ * Converts the XDR string back into a Transaction for sendTransaction.
+ */
+export async function submitSignedTransaction(
+  signedTxXdr: string
+): Promise<string> {
+  // Convert XDR string back to a Transaction using the SDK's static method
+  const tx = TransactionBuilder.fromXDR(signedTxXdr, NETWORK_PASSPHRASE);
 
-async function sorobanRpcCall(contractId: string, method: string, args: unknown[]): Promise<unknown> {
-  const response = await fetch(`${RPC_URL}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      jsonrpc: '2.0',
-      id: 1,
-      method: 'simulateTransaction',
-      params: {
-        transaction: {
-          sourceAccount: 'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
-          fee: '100',
-          networkPassphrase: process.env.NEXT_PUBLIC_NETWORK_PASSPHRASE || 'Test SDF Network ; September 2015',
-          operations: [
-            {
-              type: 'invokeHostFunction',
-              function: 'InvokeContract',
-              parameters: [
-                { type: 'address', value: contractId },
-                { type: 'symbol', value: method },
-                ...args,
-              ],
-            },
-          ],
-        },
-      },
-    }),
-    signal: AbortSignal.timeout(15000), // 15s timeout
-  });
+  const response = await server.sendTransaction(tx);
 
-  if (!response.ok) {
-    throw new Error(`RPC request failed: ${response.status} ${response.statusText}`);
+  if (response.status === 'ERROR') {
+    const errDetail = response.errorResult
+      ? response.errorResult.toXDR('base64')
+      : 'unknown error';
+    throw new Error(`Transaction submission failed: ${errDetail}`);
   }
 
-  const data = await response.json();
-  if (data.error) {
-    throw new Error(data.error.message || 'RPC error');
-  }
-
-  return data.result;
+  return response.hash;
 }
 
-async function submitVoteTransaction(
+// ─── RPC helpers ────────────────────────────────────────────────────────────
+
+/**
+ * Simulate a read-only contract call.
+ * Builds a minimal TransactionBuilder transaction, simulates it via the RPC
+ * server, and returns the SCVal retval.
+ */
+async function simulateReadCall(
+  contractId: string,
+  method: string,
+  args: unknown[]
+): Promise<xdr.ScVal> {
+  const contract = getContract(contractId);
+
+  // Convert native JS args to ScVal
+  const scValArgs = args.map((a) => nativeToScVal(a));
+
+  // Get the latest account state of our read-source
+  const sourceAccount = await server.getAccount(READ_SOURCE_PK);
+
+  const tx = new TransactionBuilder(sourceAccount, {
+    fee: BASE_FEE,
+    networkPassphrase: NETWORK_PASSPHRASE,
+  })
+    .addOperation(contract.call(method, ...scValArgs))
+    .setTimeout(30)
+    .build();
+
+  const sim = await server.simulateTransaction(tx);
+
+  if (SorobanRpc.Api.isSimulationError(sim)) {
+    throw new Error(`Simulation failed: ${sim.error}`);
+  }
+
+  // On success, sim.result.retval is the SCVal return value
+  const success = sim as SorobanRpc.Api.SimulateTransactionSuccessResponse;
+  if (!success.result) {
+    throw new Error('Simulation returned no result');
+  }
+
+  return success.result.retval;
+}
+
+/**
+ * Build and simulate a write (vote) transaction.
+ * Returns both the transaction XDR (for Freighter signing) and a placeholder
+ * hash until the transaction is actually submitted.
+ */
+async function buildAndSimulateVoteTx(
   pollId: string,
   optionIndex: number,
   signerPublicKey: string
-): Promise<string> {
-  // In production, this builds a proper Soroban transaction, signs via Freighter,
-  // and submits to the network. For now, simulate and return a placeholder hash.
-  await sorobanRpcCall(pollId, 'vote', [
-    { type: 'address', value: signerPublicKey },
-    { type: 'u32', value: optionIndex },
-  ]);
+): Promise<{ txHash: string; txXdr: string }> {
+  const contract = getContract(pollId);
 
-  // Return a unique-ish tx hash
-  return `tx_${Date.now()}_${pollId.slice(0, 8)}`;
-}
+  // Build SCVal args: voter (Address) and option_index (u32)
+  const voterScVal = new Address(signerPublicKey).toScVal();
+  const optionScVal = nativeToScVal(optionIndex, { type: 'u32' });
 
-// --- Result Parsers ---
+  // Get signer's account from network
+  const sourceAccount = await server.getAccount(signerPublicKey);
 
-function parsePollsResult(result: unknown): PollEntry[] {
-  // Decode Soroban SCVal return: Vec<PollEntry>
-  // In production, use @stellar/stellar-sdk's scValToNative or similar
-  if (!result) return [];
+  const tx = new TransactionBuilder(sourceAccount, {
+    fee: BASE_FEE,
+    networkPassphrase: NETWORK_PASSPHRASE,
+  })
+    .addOperation(contract.call('vote', voterScVal, optionScVal))
+    .setTimeout(30)
+    .build();
 
-  try {
-    const data = result as Record<string, unknown>;
-    // Handle both simulated result shapes
-    const results = Array.isArray(data.results) ? data.results : [];
-    const retval = data.retval || (results[0] as Record<string, unknown> | undefined)?.xdr || data;
-    if (Array.isArray(retval)) {
-      return retval.map(parsePollEntryObj);
-    }
-    return [];
-  } catch {
-    return [];
+  // Simulate to get the footprint and validate the call
+  const sim = await server.simulateTransaction(tx);
+
+  if (SorobanRpc.Api.isSimulationError(sim)) {
+    throw new Error(`Vote simulation failed: ${sim.error}`);
   }
+
+  // Return the transaction XDR so Freighter can sign it
+  const txXdr = tx.toXDR();
+  const txHash = tx.hash().toString('hex');
+
+  return { txHash, txXdr };
 }
 
-function parsePollInfoResult(result: unknown): PollInfo {
-  // Decode Soroban SCVal return: PollInfo struct
-  if (!result) throw new Error('Empty poll info response');
+// ─── SCVal → native decoders ───────────────────────────────────────────────
 
-  try {
-    const data = result as Record<string, unknown>;
-    const results = Array.isArray(data.results) ? data.results : [];
-    const retval = (data.retval || (results[0] as Record<string, unknown> | undefined)?.xdr || data) as Record<string, unknown>;
-    return {
-      question: String(retval.question || ''),
-      options: Array.isArray(retval.options) ? retval.options.map(String) : [],
-      vote_counts: Array.isArray(retval.vote_counts) ? retval.vote_counts.map(Number) : [],
-      is_closed: Boolean(retval.is_closed),
-      creator: String(retval.creator || ''),
-      voter_registry: String(retval.voter_registry || ''),
-      total_votes: Number(retval.total_votes || 0),
-    };
-  } catch (error) {
-    throw new Error(`Failed to parse poll info: ${error}`);
+/**
+ * Parse an SCVal-decoded polls result (an array of PollEntry maps).
+ */
+function parsePollsArray(decoded: unknown): PollEntry[] {
+  if (!Array.isArray(decoded)) return [];
+
+  return decoded.map((entry: Record<string, unknown>) => ({
+    id:
+      entry.id && typeof entry.id === 'object'
+        ? String((entry.id as { toString?: () => string }).toString?.() ?? '')
+        : String(entry.id ?? ''),
+    question: String(entry.question ?? ''),
+    creator:
+      entry.creator && typeof entry.creator === 'object'
+        ? String(
+            (entry.creator as { toString?: () => string }).toString?.() ?? ''
+          )
+        : String(entry.creator ?? ''),
+    is_closed: Boolean(entry.is_closed),
+    total_votes: Number(entry.total_votes ?? 0),
+    created_at: Number(entry.created_at ?? 0),
+  }));
+}
+
+/**
+ * Parse an SCVal-decoded PollInfo struct (returned as a map/object).
+ */
+function parsePollInfoMap(decoded: unknown): PollInfo {
+  const d = decoded as Record<string, unknown>;
+
+  if (!d || typeof d !== 'object') {
+    throw new Error('Invalid poll info response');
   }
-}
 
-function parsePollEntryObj(entry: unknown): PollEntry {
-  const e = entry as Record<string, unknown>;
   return {
-    id: String(e.id || ''),
-    question: String(e.question || ''),
-    creator: String(e.creator || ''),
-    is_closed: Boolean(e.is_closed),
-    total_votes: Number(e.total_votes || 0),
-    created_at: Number(e.created_at || 0),
+    question: String(d.question ?? ''),
+    options: Array.isArray(d.options) ? d.options.map(String) : [],
+    vote_counts: Array.isArray(d.vote_counts)
+      ? d.vote_counts.map(Number)
+      : [],
+    is_closed: Boolean(d.is_closed),
+    creator: String(
+      d.creator && typeof d.creator === 'object'
+        ? (d.creator as { toString?: () => string }).toString?.() ?? ''
+        : d.creator ?? ''
+    ),
+    voter_registry: String(
+      d.voter_registry && typeof d.voter_registry === 'object'
+        ? (
+            d.voter_registry as { toString?: () => string }
+          ).toString?.() ?? ''
+        : d.voter_registry ?? ''
+    ),
+    total_votes: Number(d.total_votes ?? 0),
   };
 }
 
+// ─── Event parsing ──────────────────────────────────────────────────────────
+
 function parseEventToActivity(
-  event: Record<string, unknown>,
+  event: SorobanRpc.Api.EventResponse,
   contractId: string
 ): ActivityEntry | null {
-  const topics = (event.topic as string[]) || [];
-  const type = topics[0] || '';
+  // Extract the first topic (event name symbol) as type indicator
+  const topics = event.topic || [];
+  if (topics.length === 0) return null;
 
-  switch (type) {
+  const firstTopic = topics[0];
+  let typeStr = '';
+
+  // Topics from getEvents are xdr.ScVal objects; decode via scValToNative
+  try {
+    const decoded = scValToNative(firstTopic as xdr.ScVal);
+    typeStr = String(decoded ?? '');
+  } catch {
+    return null;
+  }
+
+  switch (typeStr) {
     case 'voted':
       return {
         type: 'vote',
         pollId: contractId,
-        message: `A vote was cast`,
+        message: 'A vote was cast',
         timestamp: Date.now(),
       };
     case 'new_poll':
       return {
         type: 'poll_created',
         pollId: contractId,
-        message: `New poll created`,
+        message: 'New poll created',
         timestamp: Date.now(),
       };
     case 'closed':
       return {
         type: 'poll_closed',
         pollId: contractId,
-        message: `A poll was closed`,
+        message: 'A poll was closed',
         timestamp: Date.now(),
       };
     default:

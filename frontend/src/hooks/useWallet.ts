@@ -1,8 +1,13 @@
 /**
  * Hook: Wallet connection via Freighter browser extension.
+ * Uses @stellar/freighter-api (v3) for proper Freighter integration.
  * Manages connect/disconnect state and provides the connected wallet's public key.
  */
 import { useState, useEffect, useCallback } from 'react';
+import {
+  isConnected,
+  requestAccess,
+} from '@stellar/freighter-api';
 
 interface WalletState {
   connected: boolean;
@@ -21,37 +26,52 @@ export function useWallet() {
 
   const checkConnection = useCallback(async () => {
     try {
-      // Check if Freighter is installed
       if (typeof window === 'undefined') return;
 
-      const freighter = (window as unknown as Record<string, unknown>).freighterApi;
-      if (!freighter) {
+      const result = await isConnected();
+
+      if (result.error) {
         setState((prev) => ({
           ...prev,
           connected: false,
-          error: 'Freighter wallet is not installed',
+          error: result.error.message || 'Freighter wallet is not installed.',
         }));
         return;
       }
 
-      // Check if already connected
-      const api = freighter as { isConnected?: () => Promise<boolean>; getPublicKey?: () => Promise<string> };
-      const isConnected = api.isConnected ? await api.isConnected() : false;
-
-      if (isConnected && api.getPublicKey) {
-        const publicKey = await api.getPublicKey();
-        setState({
-          connected: true,
-          publicKey,
+      if (result.isConnected) {
+        // Already connected — requestAccess in v3 returns the address
+        // and typically won't re-prompt if already authorized
+        const accessResult = await requestAccess();
+        if (accessResult.error) {
+          setState((prev) => ({
+            ...prev,
+            connected: false,
+            error: accessResult.error.message || 'Failed to get wallet address.',
+          }));
+        } else {
+          setState({
+            connected: true,
+            publicKey: accessResult.address,
+            error: null,
+            isConnecting: false,
+          });
+        }
+      } else {
+        setState((prev) => ({
+          ...prev,
+          connected: false,
           error: null,
-          isConnecting: false,
-        });
+        }));
       }
     } catch (err) {
       setState({
         connected: false,
         publicKey: null,
-        error: 'Failed to check wallet connection',
+        error:
+          err instanceof Error
+            ? err.message
+            : 'Failed to check wallet connection.',
         isConnecting: false,
       });
     }
@@ -61,49 +81,35 @@ export function useWallet() {
     setState((prev) => ({ ...prev, isConnecting: true, error: null }));
 
     try {
-      const freighter = (window as unknown as Record<string, unknown>).freighterApi;
-      if (!freighter) {
+      const result = await requestAccess();
+
+      if (result.error) {
+        const msg = result.error.message || 'Wallet connection failed';
         setState((prev) => ({
           ...prev,
           isConnecting: false,
-          error: 'Please install the Freighter browser extension to connect your wallet.',
+          error: msg.includes('reject') || msg.includes('denied')
+            ? 'Connection request was rejected.'
+            : 'Please install the Freighter browser extension to connect your wallet.',
         }));
-        return;
-      }
-
-      const api = freighter as { isConnected?: () => Promise<boolean>; getPublicKey?: () => Promise<string>; requestAccess?: () => Promise<boolean> };
-
-      // Request access
-      if (api.requestAccess) {
-        await api.requestAccess();
-      }
-
-      const isConnected = api.isConnected ? await api.isConnected() : false;
-
-      if (isConnected && api.getPublicKey) {
-        const publicKey = await api.getPublicKey();
+      } else {
         setState({
           connected: true,
-          publicKey,
+          publicKey: result.address,
           error: null,
           isConnecting: false,
         });
-      } else {
-        setState((prev) => ({
-          ...prev,
-          isConnecting: false,
-          error: 'Failed to connect wallet. Please try again.',
-        }));
       }
     } catch (err) {
       const message =
         err instanceof Error ? err.message : 'Wallet connection failed';
+
       setState((prev) => ({
         ...prev,
         isConnecting: false,
-        error: message.includes('rejected')
+        error: message.includes('reject') || message.includes('denied')
           ? 'Connection request was rejected.'
-          : 'Wallet connection failed. Please try again.',
+          : 'Please install the Freighter browser extension to connect your wallet.',
       }));
     }
   }, []);
